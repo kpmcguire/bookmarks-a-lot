@@ -31,19 +31,19 @@ class Navigation extends Component {
     return (
       <nav className="main-navigation flex items-center bg-gray-600">
         <Link to="/">
-          <img className="bmal-logo -ml-20" src={logo} />
+          <img className="block bmal-logo mt-px -ml-20" src={logo} />
         </Link>
 
         {user && (
           <ul className="ml-2 w-full text-right md:text-left">
             <li className="relative">
 
-              <label className="p-2 ml-auto inline-block text-4xl md:hidden" htmlFor="nav-menu-toggle">
+              <label className="p-2 ml-auto inline-block text-3xl md:hidden md:text-4xl" htmlFor="nav-menu-toggle">
                 <FaCaretSquareDown className="text-blue-900"/>
               </label>
               <input type="checkbox" className="checkbox-toggle hidden" id="nav-menu-toggle" onChange={this.toggleDropdown} checked={this.state.dropdown} />
               
-              <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-2 rounded md:flex md:bg-transparent md:static md:w-full">
+              <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-3 rounded md:flex md:bg-transparent md:static md:w-full">
                 <li className="md:mr-2">
                   <Link to="/" onClick={this.toggleDropdown}>Bookmarks</Link>
                 </li>
