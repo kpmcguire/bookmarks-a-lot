@@ -30,7 +30,7 @@ class BookmarksList extends Component {
                     {bookmark.name}
                   </Link>
                 </li>
-                <li><a href="{bookmark.url}" className="text-gray-600 hover:text-gray-700 active:text-black"><FaExternalLinkAlt className="inline-block icon-adjust"/>{bookmark.url}</a></li>
+                <li><a href={bookmark.url} target="_blank" className="text-gray-600 hover:text-gray-700 active:text-black"><FaExternalLinkAlt className="inline-block icon-adjust"/>{bookmark.url}</a></li>
 
                 {bookmark.rating}
                 <p>{bookmark.isPublic}</p>
