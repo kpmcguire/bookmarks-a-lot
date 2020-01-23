@@ -1,6 +1,8 @@
 $blue: #2b6cb0;
 
 .main-navigation {
+  min-height: 75px;
+
   a {
     color: white;
 
@@ -13,14 +15,18 @@ $blue: #2b6cb0;
     }
   }
 
-  li {
-    margin-right: 1em;
-  }
+  // li {
+  //   margin-right: 1em;
+  // }
 }
 
 .bmal-logo {
   max-width: 450px;
   min-height: 50px;
+
+  @media screen and (max-width: 480px) {
+    width: 275px;
+  }
 }
 
 @keyframes rotation {
@@ -44,4 +50,17 @@ dl {
   dt {
     font-weight: bold;
   }
+}
+
+.checkbox-toggle {
+  &:checked {
+    + .toggle-target.hidden {
+      display: block;
+    }
+  }
+}
+
+.toggle-target {
+  top: 100%;
+  right: 0.5em;
 }

@@ -1,29 +1,61 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import {navigate, Link} from "@reach/router"
 import logo from '../images/bmal-logo.svg'
+import { FaCaretSquareDown } from 'react-icons/fa'
 
 class Navigation extends Component {
-  
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dropdown: false
+    };
+    this.toggleDropdown = this.toggleDropdown.bind(this);
+  }
+
+  toggleDropdown() {
+    this.setState({
+      dropdown: !this.state.dropdown
+    })
+  }
+
+  // componentDidMount() {
+  //   this.setState({
+  //     dropdown: false
+  //   })
+  // }
+
   render() {
     const { user, logOutUser } = this.props
     return (
-      <nav className="main-navigation flex items-center justify-between bg-gray-600">
+      <nav className="main-navigation flex items-center bg-gray-600">
         <Link to="/">
           <img className="bmal-logo -ml-20" src={logo} />
         </Link>
 
         {user && (
-          <ul className="flex container m-auto ml-2">
-            <li>
-              <Link to="/">Bookmarks</Link>
-            </li>
-            <li>
-              <Link to="/create">Add Bookmark</Link>
-            </li>
-            <li className="ml-auto">
-              <a href="#" onClick={e => logOutUser(e)}>
-                Log Out
-              </a>
+          <ul className="ml-2 w-full text-right md:text-left">
+            <li className="relative">
+
+              <label className="p-2 ml-auto inline-block text-4xl md:hidden" htmlFor="nav-menu-toggle">
+                <FaCaretSquareDown className="text-blue-900"/>
+              </label>
+              <input type="checkbox" className="checkbox-toggle hidden" id="nav-menu-toggle" onChange={this.toggleDropdown} checked={this.state.dropdown} />
+              
+              <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-2 rounded md:flex md:bg-transparent md:static md:w-full">
+                <li className="md:mr-2">
+                  <Link to="/" onClick={this.toggleDropdown}>Bookmarks</Link>
+                </li>
+                <li className="md:mr-2">
+                  <Link className="whitespace-no-wrap" to="/create" onClick={this.toggleDropdown}>Add Bookmark</Link>
+                </li>
+                <li className="md:ml-auto md:mr-2">
+                  <a href="#" onClick={e => logOutUser(e)}>
+                    Log Out
+                  </a>
+                </li>
+              </ul>
             </li>
           </ul>
         )}
@@ -31,7 +63,7 @@ class Navigation extends Component {
         {!user && (
           <ul className="flex container m-auto ml-2">
             <li>
-              <Link to="/login">Login</Link>
+              <Link to="/login" className="mr-2">Login</Link>
             </li>
             <li>
               <Link to="/register">Register</Link>

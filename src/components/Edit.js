@@ -61,7 +61,6 @@ class Edit extends Component {
 
     const { owner, isPublic, name, notes, rating, url, thumbnail } = this.state;
 
-
     let updateRef = firebase
       .firestore()
       .collection("bookmarks")
