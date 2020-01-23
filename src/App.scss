@@ -55,7 +55,7 @@ dl {
 .checkbox-toggle {
   &:checked {
     + .toggle-target.hidden {
-      display: block;
+      display: flex;
     }
   }
 }
