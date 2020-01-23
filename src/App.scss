@@ -1,0 +1,47 @@
+$blue: #2b6cb0;
+
+.main-navigation {
+  a {
+    color: white;
+
+    &:hover, &:focus {
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $blue
+    }
+  }
+
+  li {
+    margin-right: 1em;
+  }
+}
+
+.bmal-logo {
+  max-width: 450px;
+  min-height: 50px;
+}
+
+@keyframes rotation {
+    from {transform: rotate(0deg);}
+    to   {transform: rotate(359deg);}
+}
+
+.loading-spinner {
+  color: $blue;
+  animation: rotation 2s infinite linear;
+  font-size: 5em;
+}
+
+.icon-adjust {
+  position: relative;
+  top: -2px;
+  margin-right: 0.25em;
+}
+
+dl {
+  dt {
+    font-weight: bold;
+  }
+}

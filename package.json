@@ -1,0 +1,36 @@
+{
+  "name": "Bookmarks-a-lot",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reach/router": "^1.2.1",
+    "node-sass": "^4.13.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-firebase-file-uploader": "^2.4.3",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "^3.3.0"
+  },
+  "devDependencies": {
+    "firebase": "^7.7.0",
+    "react-icons": "^3.8.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
