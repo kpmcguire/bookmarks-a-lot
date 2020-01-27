@@ -91,7 +91,7 @@ class App extends Component {
 
   render() {
     return (
-      <div className="h-full flex flex-col">
+      <div className="content flex flex-col flex-1">
         <Navigation user={this.state.user} logOutUser={this.logOutUser} />
         <div className="main mx-auto flex-1 p-5 w-full">
           <Router>
@@ -106,7 +106,7 @@ class App extends Component {
             <Register path="/register" registerUser={this.registerUser} />
           </Router>
         </div>
-        <div className="footer bg-gray-800 p-5">
+        <div className="footer flex-shrink-0 bg-gray-800 p-5">
           <p className="text-white">For Bookmarking websites, homepages, portals, etc.</p>
         </div>
       </div>

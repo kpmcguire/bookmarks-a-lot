@@ -1,8 +1,6 @@
 $blue: #2b6cb0;
 
 .main-navigation {
-  min-height: 50px;
-
   a {
     color: white;
 
@@ -20,14 +18,38 @@ $blue: #2b6cb0;
   // }
 }
 
-.bmal-logo {
+.bmal-logo-wrapper-wrapper {
+  flex: 3;
   max-width: 450px;
-  min-height: 50px;
+  min-width: 250px;
 
-  @media screen and (max-width: 480px) {
-    width: 275px;
+  & + ul {
+    flex: 4; 
   }
 }
+
+.bmal-logo-wrapper {
+  padding-top: 21.6%;
+  position: relative;
+  display: block;
+}
+
+.bmal-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  // @media screen and (max-width: 480px) {
+  //   max-width: 300px;
+  //   max-height: 50px;
+  // }
+}
+
+// .main-navigation > a {
+//   height: 50px;
+// }
 
 @keyframes rotation {
     from {transform: rotate(0deg);}
@@ -61,6 +83,22 @@ dl {
 }
 
 .toggle-target {
-  top: 100%;
+  top: calc(100% - 0.5em);
   right: 0.5em;
+}
+
+// sticky footer
+
+html, body {
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+}
+.content {
+  flex: 1 0 auto;
+}
+.footer {
+  flex-shrink: 0;
 }

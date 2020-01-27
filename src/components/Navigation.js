@@ -29,10 +29,14 @@ class Navigation extends Component {
   render() {
     const { user, logOutUser } = this.props
     return (
-      <nav className="main-navigation flex items-center bg-gray-600">
-        <Link to="/">
-          <img className="block bmal-logo mt-px -ml-20" src={logo} />
-        </Link>
+      <nav className="main-navigation inline-flex items-center bg-gray-600">
+        
+          <div className="bmal-logo-wrapper-wrapper">
+            <Link to="/" className="bmal-logo-wrapper">
+              <img className="block bmal-logo mt-px" src={logo} />
+            </Link>
+          </div>
+        
 
         {user && (
           <ul className="ml-2 w-full text-right md:text-left">
@@ -43,7 +47,7 @@ class Navigation extends Component {
               </label>
               <input type="checkbox" className="checkbox-toggle hidden" id="nav-menu-toggle" onChange={this.toggleDropdown} checked={this.state.dropdown} />
               
-              <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-3 rounded inline-block md:bg-transparent md:static md:flex w-full">
+              <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-3 rounded inline-block md:bg-transparent md:static md:flex flex-col md:flex-row md:w-full">
                 <li className="md:mr-2">
                   <Link to="/" onClick={this.toggleDropdown}>Bookmarks</Link>
                 </li>
