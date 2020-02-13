@@ -1,4 +1,0 @@
-[[redirects]]
-  from = "/show/*"
-  to = "/"
-  status = 200
