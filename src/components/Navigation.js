@@ -20,14 +20,9 @@ class Navigation extends Component {
     })
   }
 
-  // componentDidMount() {
-  //   this.setState({
-  //     dropdown: false
-  //   })
-  // }
-
   render() {
     const { user, logOutUser } = this.props
+
     return (
       <nav className="main-navigation inline-flex items-center bg-gray-600">
         
@@ -53,6 +48,9 @@ class Navigation extends Component {
                 </li>
                 <li className="md:mr-2">
                   <Link className="whitespace-no-wrap" to="/create" onClick={this.toggleDropdown}>Add Bookmark</Link>
+                </li>
+                <li>
+                  <Link to="/bookmarklet">Get the Bookmarklet</Link>
                 </li>
                 <li className="md:ml-auto md:mr-2">
                   <a href="#" onClick={e => logOutUser(e)}>

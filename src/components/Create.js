@@ -20,13 +20,32 @@ class Create extends Component {
   }
   
   componentDidMount() {
+    const handoff_url = new URL(window.location)
+
+    let incoming_name = handoff_url.searchParams.get('name')
+    let incoming_url = handoff_url.searchParams.get('url')
+
     firebase.auth().onAuthStateChanged(FBUser => {
       if (FBUser) {
         this.setState({
           owner: FBUser.uid
-        });
+        })
+      } else {
+        navigate(`/login`, { state: { name: incoming_name, url: incoming_url }})
       }
     })
+    
+    if (incoming_name && incoming_name !== '') {
+      this.setState({
+        name: incoming_name
+      })
+    }
+
+    if (incoming_url && incoming_url !== '') {
+      this.setState({
+        url: incoming_url
+      })
+    }
   }
 
   onChange = e => {

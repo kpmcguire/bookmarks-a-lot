@@ -9,6 +9,7 @@ import Show from "./components/Show";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Navigation from "./components/Navigation"
+import Bookmarklet from "./components/Bookmarklet"
 
 class App extends Component {
   constructor(props) {
@@ -52,7 +53,6 @@ class App extends Component {
         });
 
       } else {
-        console.log('whatever')
         this.setState({ user: null, displayName: null, userID: null });
       }
     });
@@ -75,7 +75,6 @@ class App extends Component {
   };
 
   logOutUser = e => {
-    console.log('cool man')
     e.preventDefault();
     this.setState({
       displayName: null,
@@ -102,8 +101,10 @@ class App extends Component {
             <Edit path="/edit/:id" userID={this.state.userID} />
             <Create path="/create" userID={this.state.userID} />
             <Show path="/show/:id" userID={this.state.userID} />
+            <Bookmarklet path="/bookmarklet"/>
             <Login path="/login" />
             <Register path="/register" registerUser={this.registerUser} />
+
           </Router>
         </div>
         <div className="footer flex-shrink-0 bg-gray-800 p-5">

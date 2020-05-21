@@ -34,7 +34,12 @@ class Login extends Component {
         registrationInfo.email,
         registrationInfo.password
       ).then(() => {
-        navigate('/')
+
+        if (this.props.location.state.name && this.props.location.state.url ) {
+          navigate(`/create?name=${this.props.location.state.name}&url=${this.props.location.state.url}`)
+        } else {
+          navigate('/')
+        }
       })
       .catch(error => {
         if (error.message !== null) {
