@@ -36,7 +36,7 @@ class Login extends Component {
       ).then(() => {
 
         if (this.props.location.state.name && this.props.location.state.url ) {
-          navigate(`/create?name=${this.props.location.state.name}&url=${this.props.location.state.url}`)
+          navigate(`/create?name=${encodeURIComponent(this.props.location.state.name)}&url=${encodeURIComponent(this.props.location.state.url)}`)
         } else {
           navigate('/')
         }
