@@ -15,10 +15,17 @@ class Create extends Component {
       notes: "",
       rating: "",
       url: "",
-      thumbnail: ""
+      thumbnail: "", 
+      isLoading: false
     }
   }
-  
+
+  uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    )
+  }
+
   componentDidMount() {
     const handoff_url = new URL(window.location)
 
@@ -69,7 +76,7 @@ class Create extends Component {
         url,
         thumbnail
       })
-      .then(docRef => {
+      .then((docRef) => {
         this.setState({
           owner: '',
           isPublic: '',
@@ -85,6 +92,31 @@ class Create extends Component {
         console.error("Error adding document: ", error);
       });
   };
+
+
+  fetchImage = (e) => {
+    e.preventDefault()
+    this.setState({isLoading: true})
+    
+    fetch(
+      `${process.env.REACT_APP_THUMBNAIL_CREATOR_URL}/image?url=${this.state.url}`
+    )
+      .then((response) => response.json())
+      .then((thumb) => {
+        var datapng = "data:image/png;base64," + thumb.image;
+        document.getElementById("myimage").src = datapng.toString("base64");
+        let storageRef = firebase
+          .storage()
+          .ref("images")
+          .child(`${this.uuidv4()}.png`);
+        storageRef.putString(thumb.image, "base64").then((snapshot) => {
+          snapshot.ref.getDownloadURL().then((imageurl) => {
+            this.setState({isLoading: false})
+            this.setState({ thumbnail: imageurl });
+          });
+        });
+      });
+  }
 
   handleUploadStart = () => this.setState({ isUploading: true, progress: 0 });
   handleProgress = progress => this.setState({ progress });
@@ -140,6 +172,12 @@ class Create extends Component {
               value={url}
               onChange={this.onChange}
             />
+            <button onClick={this.fetchImage}>Fetch image</button>
+            {
+              this.state.isLoading === true
+              ? <p>The image is loading</p>
+              : <p>The image is not loading</p>
+            }
           </div>
           <div className="form-group">
             <label
@@ -195,6 +233,7 @@ class Create extends Component {
               className="ml-2"
             />
           </label>
+          <img id="myimage" />
           <FileUploader
             accept="image/*"
             name="thumbnail"
