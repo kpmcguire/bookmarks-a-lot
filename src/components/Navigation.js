@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
-import {navigate, Link} from "@reach/router"
+import {Link} from "@reach/router"
 import logo from '../images/bmal-logo.svg'
 import { FaCaretSquareDown } from 'react-icons/fa'
 
@@ -28,7 +27,7 @@ class Navigation extends Component {
         
           <div className="bmal-logo-wrapper-wrapper">
             <Link to="/" className="bmal-logo-wrapper">
-              <img className="block bmal-logo mt-px" src={logo} />
+              <img alt="" className="block bmal-logo mt-px" src={logo} />
             </Link>
           </div>
         
@@ -53,9 +52,9 @@ class Navigation extends Component {
                   <Link to="/bookmarklet">Get the Bookmarklet</Link>
                 </li>
                 <li className="md:ml-auto md:mr-2">
-                  <a href="#" onClick={e => logOutUser(e)}>
+                  <button className="text-white" onClick={e => logOutUser(e)}>
                     Log Out
-                  </a>
+                  </button>
                 </li>
               </ul>
             </li>

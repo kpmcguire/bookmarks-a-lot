@@ -4,9 +4,9 @@ import {navigate} from "@reach/router"
 
 
 class Bookmarklet extends Component {
-  constructor(props) {
-    super(props)
-  }
+  // constructor(props) {
+  //   super(props)
+  // }
 
 
   componentDidMount(){

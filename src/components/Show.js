@@ -83,7 +83,7 @@ class Show extends Component {
             <dd>{notes}</dd>
             <dt>thumbnail:</dt>
             <dd>
-              <img src={thumbnail} width="100"></img>
+              <img alt="" src={thumbnail} width="100"></img>
             </dd>
           </dl>
           {this.props.userID && (

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import firebase from "../Firebase";
-import {navigate, Link} from "@reach/router"
+import {navigate} from "@reach/router"
 import FileUploader from 'react-firebase-file-uploader'
 
 class Edit extends Component {
@@ -208,7 +208,7 @@ class Edit extends Component {
             <p className="block text-gray-700 text-sm font-bold mb-2">
               Thumbnail:
             </p>
-            <img src={thumbnail} width="100"></img>
+            <img alt="" src={thumbnail} width="100"></img>
           </div>
           <FileUploader
             accept="image/*"

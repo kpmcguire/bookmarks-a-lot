@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@reach/router": "^1.2.1",
-    "node-sass": "^4.13.1",
+    "node-sass": "^4.14.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-firebase-file-uploader": "^2.4.3",
@@ -12,7 +12,7 @@
     "react-scripts": "^3.3.0"
   },
   "devDependencies": {
-    "firebase": "^7.7.0",
+    "firebase": "^7.15.0",
     "react-icons": "^3.8.0"
   },
   "scripts": {

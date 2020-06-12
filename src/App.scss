@@ -106,3 +106,22 @@ body {
 .text-shadow {
   text-shadow: 0.05em 0.05em 0 rgba(black, 0.7)
 }
+
+.thumbnail-placeholder {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    padding-top: 75%;
+  }
+
+  .loading-spinner {
+    font-size: 2em;
+  }
+}
+
