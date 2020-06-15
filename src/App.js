@@ -16,6 +16,7 @@ class App extends Component {
     super(props);
     this.ref = firebase.firestore().collection("bookmarks");
     this.temp = null;
+    this.boxTop = React.createRef();
     this.state = {
       bookmarks: [],
       lastVisible: null,
@@ -27,60 +28,59 @@ class App extends Component {
       pageLength: 10,
       firstEverRecord: null,
       querySize: null,
-      showPagination: null
+      showPagination: null,
     };
   }
 
-
-
   componentDidMount() {
-    firebase.auth().onAuthStateChanged(FBUser => {
+    firebase.auth().onAuthStateChanged((FBUser) => {
       if (FBUser) {
         let shouldShowPagination = false;
-        if(window.location.pathname === '/') {
-          shouldShowPagination = true
+        if (window.location.pathname === "/") {
+          shouldShowPagination = true;
         }
 
-        this.setState({
-          user: FBUser,
-          displayName: FBUser.displayName,
-          userID: FBUser.uid,
-          showPagination: shouldShowPagination
-        }, ()=>{
-          this.loadBookMarks();
-        });
-      
+        this.setState(
+          {
+            user: FBUser,
+            displayName: FBUser.displayName,
+            userID: FBUser.uid,
+            showPagination: shouldShowPagination,
+          },
+          () => {
+            this.loadBookMarks();
+          }
+        );
       } else {
         this.setState({ user: null, displayName: null, userID: null });
       }
     });
-    
+
     globalHistory.listen(({ action }) => {
-      if (action === 'PUSH') {
+      console.log(action);
+      if (action === "PUSH" || action === "POP") {
         let shouldShowPagination = false;
 
-        if(window.location.pathname === '/') {
-          shouldShowPagination = true  
+        if (window.location.pathname === "/") {
+          shouldShowPagination = true;
         }
 
         this.setState({
-          showPagination: shouldShowPagination
-        })
+          showPagination: shouldShowPagination,
+        });
       }
-    })
+    });
   }
 
-
-
-  registerUser = userName => {
-    firebase.auth().onAuthStateChanged(FBUser => {
+  registerUser = (userName) => {
+    firebase.auth().onAuthStateChanged((FBUser) => {
       FBUser.updateProfile({
-        displayName: userName
+        displayName: userName,
       }).then(() => {
         this.setState({
           user: FBUser,
           displayName: FBUser.displayName,
-          userID: FBUser.uid
+          userID: FBUser.uid,
         });
 
         navigate("/");
@@ -88,131 +88,142 @@ class App extends Component {
     });
   };
 
-  logOutUser = e => {
+  logOutUser = (e) => {
     e.preventDefault();
     this.setState({
       displayName: null,
       userID: null,
-      user: null
+      user: null,
     });
-    firebase.auth().signOut().then(() => {
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
         navigate("/login");
-    })
+      });
   };
 
+  scrollToBoxTop = () => window.scrollTo(0, this.boxTop.current.offsetTop);
+
   loadNext = () => {
-    this.setState({
-      next: true,
-      prev: false,
-    }, ()=>{
-      this.loadBookMarks()
-    })
-  }
+    this.setState(
+      {
+        next: true,
+        prev: false,
+      },
+      () => {
+        this.loadBookMarks()
+        this.scrollToBoxTop()
+      }
+    );
+  };
 
   loadPrev = () => {
-    this.setState({
-      next: false,
-      prev: true
-    }, ()=>{
-      this.loadBookMarks()
-    })
-  }
+    this.setState(
+      {
+        next: false,
+        prev: true,
+      },
+      () => {
+        this.loadBookMarks()
+        this.scrollToBoxTop()
+      }
+    );
+  };
 
   loadBookMarks = () => {
     this.temp = this.ref
       .where("owner", "==", this.state.userID)
       .orderBy("name");
 
-      if (this.state.next === true) {
-        this.temp = this.temp.startAfter(this.state.lastVisible)
-        this.temp = this.temp.limit(this.state.pageLength)
-      } else if (this.state.prev === true) {
+    if (this.state.next === true) {
+      this.temp = this.temp.startAfter(this.state.lastVisible);
+      this.temp = this.temp.limit(this.state.pageLength);
+    } else if (this.state.prev === true) {
+      this.temp = this.temp.endBefore(this.state.firstVisible);
+      this.temp = this.temp.limitToLast(this.state.pageLength);
+    } else {
+      this.temp = this.temp.limit(this.state.pageLength);
+    }
 
-        this.temp = this.temp.endBefore(this.state.firstVisible)
-        this.temp = this.temp.limitToLast(this.state.pageLength)
-      } else {
-        this.temp = this.temp.limit(this.state.pageLength);
+    this.temp.onSnapshot((querySnapshot) => {
+      this.setState({
+        querySize: querySnapshot.size,
+      });
+
+      var firstVisible = querySnapshot.docs[0];
+
+      if (this.state.firstEverRecord == null) {
+        this.setState({
+          firstEverRecord: firstVisible,
+        });
       }
 
-      this.temp.onSnapshot((querySnapshot) => {
+      this.setState({
+        firstVisible: firstVisible,
+      });
 
+      var lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      this.setState({
+        lastVisible: lastVisible,
+      });
+
+      if (
+        this.state.firstVisible.get("id") ===
+        this.state.firstEverRecord.get("id")
+      ) {
         this.setState({
-          querySize: querySnapshot.size
+          disableNext: false,
+          disablePrev: true,
         });
-        
-        var firstVisible = querySnapshot.docs[0]
-
-        if (this.state.firstEverRecord == null) {
-          this.setState({
-            firstEverRecord: firstVisible
-          })
-        }
-
+      } else {
         this.setState({
-          firstVisible: firstVisible,
-        })
-
-        var lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1]
-        this.setState({
-          lastVisible: lastVisible,
-        })
-
-
-        if (this.state.firstVisible.get('id') === this.state.firstEverRecord.get('id')) {
-
-          this.setState({
-            disableNext: false,
-            disablePrev: true
-          })
-        } else {
-          this.setState({
-            disableNext: false,
-            disablePrev: false
-          })
-        }
-
-        if (this.state.querySize < this.state.pageLength) {
-          this.setState({
-            disableNext: true,
-            disablePrev: false
-          })
-        }
-
-        const bookmarks = [];
-        querySnapshot.forEach(function (doc) {
-          const {
-            owner,
-            isPublic,
-            name,
-            notes,
-            rating,
-            url,
-            thumbnail,
-          } = doc.data();
-          bookmarks.push({
-            key: doc.id,
-            doc, // DocumentSnapshot
-            owner,
-            isPublic,
-            name,
-            notes,
-            rating,
-            url,
-            thumbnail,
-          });
+          disableNext: false,
+          disablePrev: false,
         });
+      }
+
+      if (this.state.querySize < this.state.pageLength) {
         this.setState({
-          bookmarks,
+          disableNext: true,
+          disablePrev: false,
+        });
+      }
+
+      const bookmarks = [];
+      querySnapshot.forEach(function (doc) {
+        const {
+          owner,
+          isPublic,
+          name,
+          notes,
+          rating,
+          url,
+          thumbnail,
+        } = doc.data();
+        bookmarks.push({
+          key: doc.id,
+          doc, // DocumentSnapshot
+          owner,
+          isPublic,
+          name,
+          notes,
+          rating,
+          url,
+          thumbnail,
         });
       });
-  }
+      this.setState({
+        bookmarks,
+      });
+    });
+  };
 
   render() {
-    
     return (
       <div className="content flex flex-col flex-1">
         <Navigation user={this.state.user} logOutUser={this.logOutUser} />
-        <div className="main mx-auto flex-1 p-5 w-full">
+        <div className="main mx-auto flex-1 p-5 w-full" ref={this.boxTop}>
           <Router onChange={this.updateLocation}>
             {this.state.user && (
               <BookmarksList path="/" bookmarks={this.state.bookmarks} />

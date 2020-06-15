@@ -58,7 +58,9 @@ class Create extends Component {
 
     if (incoming_url && incoming_url !== "") {
       this.setState({
-        url: incoming_url,
+        url: incoming_url
+      }, ()=> {
+        this.fetchImage()
       });
     }
   }
@@ -195,7 +197,7 @@ class Create extends Component {
                   className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-3"
                   name="url"
                   id="url"
-                  // value={url}
+                  defaultValue={this.state.url}
                   onBlur={this.onUrlChange}
                 />
               </div>

@@ -17,10 +17,10 @@ class BookmarksList extends Component {
           {this.props.bookmarks.map(bookmark => (
             <li key={bookmark.key} className="flex items-start border border-collapse -mt-px p-2">
               {bookmark.thumbnail && (
-                <img alt="" src={bookmark.thumbnail} className="w-20 h-auto mr-2"></img>
+                <img alt="" src={bookmark.thumbnail} className="w-20 h-auto m-1 mr-2 flex-shrink-0"></img>
               )}
               {!bookmark.thumbnail && (
-                <div className="w-20 h-20 bg-gray-200 mr-2"></div>
+                <div className="w-20 h-20 bg-gray-200 m-1 mr-2 flex-shrink-0"></div>
               )}
               
               <ul className="">
