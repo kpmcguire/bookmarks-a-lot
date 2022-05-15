@@ -6,7 +6,7 @@ class BookmarksList extends Component {
   render() {
     return (
       <div className="">
-        <h1 className="text-xl font-bold">Bookmarks</h1>
+        <h1 className="text-xl font-bold"> {this.props.displayName}'s Bookmarks</h1>
         <Link
           to="/create"
           className="bg-blue-700 hover:bg-blue-900 active:bg-blue-500 text-white font-bold py-2 px-4 rounded my-2 inline-block"
@@ -32,6 +32,10 @@ class BookmarksList extends Component {
                       '[blank]'
                     )}
                   </Link>
+                  
+                  <span class="inline-block py-1.5 px-2.5 ml-2 text-xs leading-none text-center whitespace-nowrap align-baseline font-bold bg-slate-600 text-white rounded">{bookmark.isPublic ? 'Public' : 'Private'}</span>
+
+                  
                 </li>
                 <li><a href={bookmark.url} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-700 active:text-black">
                   <FaExternalLinkAlt className="inline-block icon-adjust"/> 
@@ -41,8 +45,6 @@ class BookmarksList extends Component {
                       '[blank]'
                     )}
                 </a></li>
-                {bookmark.rating}
-                <p>{bookmark.isPublic}</p>
                 <p>{bookmark.notes}</p>
               </ul>
             </li>

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 $blue: #2b6cb0;
 
 .main-navigation {
@@ -8,9 +12,6 @@ $blue: #2b6cb0;
       text-decoration: underline;
     }
 
-    &:active {
-      color: $blue
-    }
   }
 
   // li {

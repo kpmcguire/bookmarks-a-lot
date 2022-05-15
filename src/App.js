@@ -19,55 +19,36 @@ class App extends Component {
     this.boxTop = React.createRef();
     this.state = {
       bookmarks: [],
-      lastVisible: null,
-      firstVisible: null,
-      prev: false,
-      next: true,
-      disableNext: false,
-      disablePrev: true,
-      pageLength: 10,
-      firstEverRecord: null,
-      querySize: null,
-      showPagination: null,
+      limit: 10,
+      numBookmarksShown: 0,
+      totalNumBookmarks: 0,
     };
   }
 
   componentDidMount() {
     firebase.auth().onAuthStateChanged((FBUser) => {
       if (FBUser) {
-        let shouldShowPagination = false;
-        if (window.location.pathname === "/") {
-          shouldShowPagination = true;
-        }
 
         this.setState(
           {
             user: FBUser,
             displayName: FBUser.displayName,
             userID: FBUser.uid,
-            showPagination: shouldShowPagination,
           },
           () => {
+            
+            this.ref = firebase.firestore().collection("bookmarks");
+                    
+            this.ref.where("owner", "==", this.state.userID).get().then(snap => {
+              // setState({numBookmarksShown: snap.size});
+              this.state.numBookmarksShown = snap.size;
+            });
+            
             this.loadBookMarks();
           }
         );
       } else {
         this.setState({ user: null, displayName: null, userID: null });
-      }
-    });
-
-    globalHistory.listen(({ action }) => {
-      console.log(action);
-      if (action === "PUSH" || action === "POP") {
-        let shouldShowPagination = false;
-
-        if (window.location.pathname === "/") {
-          shouldShowPagination = true;
-        }
-
-        this.setState({
-          showPagination: shouldShowPagination,
-        });
       }
     });
   }
@@ -103,130 +84,56 @@ class App extends Component {
       });
   };
 
-  scrollToBoxTop = () => window.scrollTo(0, this.boxTop.current.offsetTop);
-
-  loadNext = () => {
-    this.setState(
-      {
-        next: true,
-        prev: false,
-      },
-      () => {
-        this.loadBookMarks()
-        this.scrollToBoxTop()
-      }
-    );
-  };
-
-  loadPrev = () => {
-    this.setState(
-      {
-        next: false,
-        prev: true,
-      },
-      () => {
-        this.loadBookMarks()
-        this.scrollToBoxTop()
-      }
-    );
-  };
-
   loadBookMarks = () => {
-    this.temp = this.ref
+    this.ref
       .where("owner", "==", this.state.userID)
-      .orderBy("name");
-
-    if (this.state.next === true) {
-      this.temp = this.temp.startAfter(this.state.lastVisible);
-      this.temp = this.temp.limit(this.state.pageLength);
-    } else if (this.state.prev === true) {
-      this.temp = this.temp.endBefore(this.state.firstVisible);
-      this.temp = this.temp.limitToLast(this.state.pageLength);
-    } else {
-      this.temp = this.temp.limit(this.state.pageLength);
-    }
-
-    this.temp.onSnapshot((querySnapshot) => {
-      this.setState({
-        querySize: querySnapshot.size,
-      });
-
-      var firstVisible = querySnapshot.docs[0];
-
-      if (this.state.firstEverRecord == null) {
-        this.setState({
-          firstEverRecord: firstVisible,
-        });
-      }
-
-      this.setState({
-        firstVisible: firstVisible,
-      });
-
-      var lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-      this.setState({
-        lastVisible: lastVisible,
-      });
-
-      if (
-        this.state.firstVisible.get("id") ===
-        this.state.firstEverRecord.get("id")
-      ) {
-        this.setState({
-          disableNext: false,
-          disablePrev: true,
-        });
-      } else {
-        this.setState({
-          disableNext: false,
-          disablePrev: false,
-        });
-      }
-
-      if (this.state.querySize < this.state.pageLength) {
-        this.setState({
-          disableNext: true,
-          disablePrev: false,
-        });
-      }
-
-      const bookmarks = [];
-      querySnapshot.forEach(function (doc) {
-        const {
-          owner,
-          isPublic,
-          name,
-          notes,
-          rating,
-          url,
-          thumbnail,
-        } = doc.data();
-        bookmarks.push({
-          key: doc.id,
-          doc, // DocumentSnapshot
-          owner,
-          isPublic,
-          name,
-          notes,
-          rating,
-          url,
-          thumbnail,
-        });
-      });
-      this.setState({
-        bookmarks,
+      .limit(this.state.limit)
+      .onSnapshot(snapshot => {  
+    this.setState({totalNumBookmarks: snapshot.size});
+    
+    const bookmarks = [];
+    
+    snapshot.forEach(doc => {
+      const {
+      owner,
+      isPublic,
+      name,
+      notes,
+      rating,
+      url,
+      thumbnail
+      } = doc.data();
+      
+      bookmarks.push({
+      key: doc.id,
+      doc,
+      owner,
+      isPublic,
+      name,
+      notes,
+      rating,
+      url,
+      thumbnail,
       });
     });
+    
+    this.setState({bookmarks});
+    });
+  };
+  
+  onNextPage = () => {
+    this.setState({limit: this.state.limit * 2})
+    this.loadBookMarks()
   };
 
   render() {
     return (
       <div className="content flex flex-col flex-1">
         <Navigation user={this.state.user} logOutUser={this.logOutUser} />
-        <div className="main mx-auto flex-1 p-5 w-full" ref={this.boxTop}>
+        <div className="main mx-auto flex-1 p-5 w-full">
           <Router onChange={this.updateLocation}>
             {this.state.user && (
-              <BookmarksList path="/" bookmarks={this.state.bookmarks} />
+              <BookmarksList path="/" bookmarks={this.state.bookmarks} displayName={this.state.displayName} />
             )}
 
             <Edit path="/edit/:id" userID={this.state.userID} />
@@ -237,32 +144,13 @@ class App extends Component {
             <Register path="/register" registerUser={this.registerUser} />
           </Router>
 
-          {this.state.showPagination && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-auto text-left">
-                <button
-                  className={
-                    "bg-green-700 hover:bg-green-900 active:bg-green-500 text-white font-bold py-2 px-4 rounded my-2 " +
-                    (this.state.disablePrev ? "hidden" : "")
-                  }
-                  onClick={this.loadPrev}
-                >
-                  Previous
-                </button>
-              </div>
-              <div className="col-auto text-right">
-                <button
-                  className={
-                    "bg-green-700 hover:bg-green-900 active:bg-green-500 text-white font-bold py-2 px-4 rounded my-2 " +
-                    (this.state.disableNext ? "hidden" : "")
-                  }
-                  onClick={this.loadNext}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          {this.state.numBookmarksShown !== this.state.totalNumBookmarks && 
+            
+            <button type="button" onClick={this.onNextPage} className={
+            "bg-green-700 hover:bg-green-900 active:bg-green-500 text-white font-bold py-2 px-4 rounded my-2"}>
+              Load more
+            </button>
+          }
         </div>
         <div className="footer flex-shrink-0 bg-gray-800 p-5">
           <p className="text-white">
