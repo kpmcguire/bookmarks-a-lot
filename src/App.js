@@ -1,7 +1,7 @@
 import React, { Component, useState, useEffect } from "react";
 import "./App.scss";
 import firebase from "./Firebase";
-import {Router, navigate} from "@reach/router"
+import { Router, navigate } from "@reach/router"
 import BookmarksList from "./BookmarksList";
 import Edit from "./components/Edit";
 import Create from "./components/Create";
@@ -14,7 +14,6 @@ import Bookmarklet from "./components/Bookmarklet"
 let db;
 
 const App = () => {
-
   const [state, setState] = useState({
     bookmarks: [],
     perPage: 10,
@@ -24,48 +23,46 @@ const App = () => {
     shouldShowPagination: false,
 
   });
-  
+
   const [user, setUser] = useState({
     user: null,
     displayName: null,
     userID: null,
   })
-  
+
   useEffect(() => {
 
     firebase.auth().onAuthStateChanged((FBUser) => {
       if (FBUser) {
         setUser({
-        ...user,
-        user: firebase.auth().currentUser,
-        displayName: firebase.auth().currentUser.displayName,
-        userID: firebase.auth().currentUser.uid,
-      })      
-  
+          ...user,
+          user: firebase.auth().currentUser,
+          displayName: firebase.auth().currentUser.displayName,
+          userID: firebase.auth().currentUser.uid,
+        })
+
       } else {
         setUser({ ...user, user: null, displayName: null, userID: null });
       }
     });
-              
-  },[]);
-  
+  }, []);
+
   useEffect(() => {
-      if(user) {
-        db = firebase.firestore().collection("bookmarks");
-  
-        db.where("owner", "==", user.userID).get().then(snap => {
-            setState({ ...state, totalNumBookmarks: snap.size, shouldShowPagination: true });
-        });
-      }
+    if (user) {
+      db = firebase.firestore().collection("bookmarks");
+
+      db.where("owner", "==", user.userID).get().then(snap => {
+        setState({ ...state, totalNumBookmarks: snap.size, shouldShowPagination: true });
+      });
+    }
   }, [user]);
 
   useEffect(() => {
-      if(state) {
-        loadBookMarks();
-      }
+    if (state) {
+      loadBookMarks();
+    }
   }, [state]);
 
-  
   const registerUser = (userName) => {
     firebase.auth().onAuthStateChanged((FBUser) => {
       FBUser.updateProfile({
@@ -77,12 +74,12 @@ const App = () => {
           displayName: FBUser.displayName,
           userID: FBUser.uid,
         });
-  
+
         navigate("/");
       });
     });
   };
-  
+
   const logOutUser = (e) => {
     e.preventDefault();
     setState({
@@ -98,49 +95,48 @@ const App = () => {
         navigate("/login");
       });
   };
-  
+
   const loadBookMarks = () => {
-    
     db
       .where("owner", "==", user.userID)
       .limit(state.limit)
-      .onSnapshot(snapshot => {  
-            
-    const bookmarks = [];
-    
-    snapshot.forEach(doc => {
-      const {
-      owner,
-      isPublic,
-      name,
-      notes,
-      rating,
-      url,
-      thumbnail
-      } = doc.data();
-      
-      bookmarks.push({
-      key: doc.id,
-      doc,
-      owner,
-      isPublic,
-      name,
-      notes,
-      rating,
-      url,
-      thumbnail,
+      .onSnapshot(snapshot => {
+
+        const bookmarks = [];
+
+        snapshot.forEach(doc => {
+          const {
+            owner,
+            isPublic,
+            name,
+            notes,
+            rating,
+            url,
+            thumbnail
+          } = doc.data();
+
+          bookmarks.push({
+            key: doc.id,
+            doc,
+            owner,
+            isPublic,
+            name,
+            notes,
+            rating,
+            url,
+            thumbnail,
+          });
+        });
+
+        setState({ ...state, numBookmarksShown: bookmarks.length, bookmarks });
       });
-    });
-    
-    setState({...state, numBookmarksShown: bookmarks.length, bookmarks});
-    });
-  };
-  
-  const onNextPage = () => {
-    setState({...state, limit: state.limit + state.perPage})
-    loadBookMarks()
   };
 
+  const onNextPage = () => {
+    setState({ ...state, limit: state.limit + state.perPage })
+    loadBookMarks()
+  };
+  
   return (
     <div className="content flex flex-col flex-1">
       <Navigation user={user.user} logOutUser={logOutUser} />
