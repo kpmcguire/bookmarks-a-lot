@@ -37,21 +37,21 @@ class Navigation extends Component {
             <li className="relative md:static">
 
               <label className="p-2 ml-auto inline-block text-3xl md:hidden md:text-4xl" htmlFor="nav-menu-toggle">
-                <FaCaretSquareDown className="text-blue-900"/>
+                <FaCaretSquareDown className="text-white"/>
               </label>
               <input type="checkbox" className="checkbox-toggle hidden" id="nav-menu-toggle" onChange={this.toggleDropdown} checked={this.state.dropdown} />
               
               <ul className="toggle-target hidden absolute bg-blue-900 py-1 px-3 rounded inline-block md:bg-transparent md:static md:flex flex-col md:flex-row md:w-full">
-                <li className="md:mr-2">
+                <li className="md:mr-2 mb-2">
                   <Link to="/" onClick={this.toggleDropdown}>Bookmarks</Link>
                 </li>
-                <li className="md:mr-2">
+                <li className="md:mr-2 mb-2">
                   <Link className="whitespace-no-wrap" to="/create" onClick={this.toggleDropdown}>Add Bookmark</Link>
                 </li>
-                <li>
-                  <Link to="/bookmarklet">Get the Bookmarklet</Link>
+                <li className="md:mr-2 mb-2">
+                  <Link to="/bookmarklet" onClick={this.toggleDropdown}>Get the Bookmarklet</Link>
                 </li>
-                <li className="md:ml-auto md:mr-2">
+                <li className="md:ml-auto md:mr-2 mb-2">
                   <button className="text-white" onClick={e => logOutUser(e)}>
                     Log Out
                   </button>

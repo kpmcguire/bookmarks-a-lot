@@ -3,7 +3,6 @@ import firebase from "../Firebase";
 import {Link, navigate} from "@reach/router"
 import {FaSpinner} from 'react-icons/fa'
 
-
 class Show extends Component {
   constructor(props) {
     super(props);

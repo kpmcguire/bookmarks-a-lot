@@ -1,7 +1,7 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import "./App.scss";
 import firebase from "./Firebase";
-import {Router, navigate, globalHistory} from "@reach/router"
+import {Router, navigate} from "@reach/router"
 import BookmarksList from "./BookmarksList";
 import Edit from "./components/Edit";
 import Create from "./components/Create";
@@ -11,67 +11,82 @@ import Login from "./components/Login";
 import Navigation from "./components/Navigation"
 import Bookmarklet from "./components/Bookmarklet"
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.ref = firebase.firestore().collection("bookmarks");
-    this.temp = null;
-    this.boxTop = React.createRef();
-    this.state = {
-      bookmarks: [],
-      limit: 10,
-      numBookmarksShown: 0,
-      totalNumBookmarks: 0,
-    };
-  }
+let db;
 
-  componentDidMount() {
+const App = () => {
+
+  const [state, setState] = useState({
+    bookmarks: [],
+    perPage: 10,
+    limit: 10,
+    numBookmarksShown: 0,
+    totalNumBookmarks: 0,
+    shouldShowPagination: false,
+
+  });
+  
+  const [user, setUser] = useState({
+    user: null,
+    displayName: null,
+    userID: null,
+  })
+  
+  useEffect(() => {
+
     firebase.auth().onAuthStateChanged((FBUser) => {
       if (FBUser) {
-
-        this.setState(
-          {
-            user: FBUser,
-            displayName: FBUser.displayName,
-            userID: FBUser.uid,
-          },
-          () => {
-            
-            this.ref = firebase.firestore().collection("bookmarks");
-                    
-            this.ref.where("owner", "==", this.state.userID).get().then(snap => {
-              // setState({numBookmarksShown: snap.size});
-              this.state.numBookmarksShown = snap.size;
-            });
-            
-            this.loadBookMarks();
-          }
-        );
+        setUser({
+        ...user,
+        user: firebase.auth().currentUser,
+        displayName: firebase.auth().currentUser.displayName,
+        userID: firebase.auth().currentUser.uid,
+      })      
+  
       } else {
-        this.setState({ user: null, displayName: null, userID: null });
+        setUser({ ...user, user: null, displayName: null, userID: null });
       }
     });
-  }
+              
+  },[]);
+  
+  useEffect(() => {
+      if(user) {
+        db = firebase.firestore().collection("bookmarks");
+  
+        db.where("owner", "==", user.userID).get().then(snap => {
+            setState({ ...state, totalNumBookmarks: snap.size, shouldShowPagination: true });
+        });
+      }
+  }, [user]);
 
-  registerUser = (userName) => {
+  useEffect(() => {
+      if(state) {
+        loadBookMarks();
+      }
+  }, [state]);
+
+  
+  const registerUser = (userName) => {
     firebase.auth().onAuthStateChanged((FBUser) => {
       FBUser.updateProfile({
         displayName: userName,
       }).then(() => {
-        this.setState({
+        setState({
+          ...state,
           user: FBUser,
           displayName: FBUser.displayName,
           userID: FBUser.uid,
         });
-
+  
         navigate("/");
       });
     });
   };
-
-  logOutUser = (e) => {
+  
+  const logOutUser = (e) => {
     e.preventDefault();
-    this.setState({
+    setState({
+      ...state,
       displayName: null,
       userID: null,
       user: null,
@@ -83,14 +98,14 @@ class App extends Component {
         navigate("/login");
       });
   };
-
-  loadBookMarks = () => {
-    this.ref
-      .where("owner", "==", this.state.userID)
-      .limit(this.state.limit)
-      .onSnapshot(snapshot => {  
-    this.setState({totalNumBookmarks: snapshot.size});
+  
+  const loadBookMarks = () => {
     
+    db
+      .where("owner", "==", user.userID)
+      .limit(state.limit)
+      .onSnapshot(snapshot => {  
+            
     const bookmarks = [];
     
     snapshot.forEach(doc => {
@@ -117,49 +132,41 @@ class App extends Component {
       });
     });
     
-    this.setState({bookmarks});
+    setState({...state, numBookmarksShown: bookmarks.length, bookmarks});
     });
   };
   
-  onNextPage = () => {
-    this.setState({limit: this.state.limit * 2})
-    this.loadBookMarks()
+  const onNextPage = () => {
+    setState({...state, limit: state.limit + state.perPage})
+    loadBookMarks()
   };
 
-  render() {
-    return (
-      <div className="content flex flex-col flex-1">
-        <Navigation user={this.state.user} logOutUser={this.logOutUser} />
-        <div className="main mx-auto flex-1 p-5 w-full">
-          <Router onChange={this.updateLocation}>
-            {this.state.user && (
-              <BookmarksList path="/" bookmarks={this.state.bookmarks} displayName={this.state.displayName} />
-            )}
+  return (
+    <div className="content flex flex-col flex-1">
+      <Navigation user={user.user} logOutUser={logOutUser} />
+      <div className="main mx-auto flex-1 p-5 w-full">
+        <Router>
+          {user.user && (
+            <BookmarksList path="/" bookmarks={state.bookmarks} displayName={user.displayName} onNextPage={onNextPage} numBookmarksShown={state.numBookmarksShown} totalNumBookmarks={state.totalNumBookmarks} />
+          )}
+          
+          <Edit path="/edit/:id" userID={user.userID} />
+          <Create path="/create" userID={user.userID} />
+          <Show path="/show/:id" userID={user.userID} />
+          <Bookmarklet path="/bookmarklet" />
+          <Login path="/login" />
+          <Register path="/register" registerUser={registerUser} />
+        </Router>
+  
 
-            <Edit path="/edit/:id" userID={this.state.userID} />
-            <Create path="/create" userID={this.state.userID} />
-            <Show path="/show/:id" userID={this.state.userID} />
-            <Bookmarklet path="/bookmarklet" />
-            <Login path="/login" />
-            <Register path="/register" registerUser={this.registerUser} />
-          </Router>
-
-          {this.state.numBookmarksShown !== this.state.totalNumBookmarks && 
-            
-            <button type="button" onClick={this.onNextPage} className={
-            "bg-green-700 hover:bg-green-900 active:bg-green-500 text-white font-bold py-2 px-4 rounded my-2"}>
-              Load more
-            </button>
-          }
-        </div>
-        <div className="footer flex-shrink-0 bg-gray-800 p-5">
-          <p className="text-white">
-            For Bookmarking websites, homepages, portals, etc.
-          </p>
-        </div>
       </div>
-    );
-  }
+      <div className="footer flex-shrink-0 bg-gray-800 p-5">
+        <p className="text-white">
+          For Bookmarking websites, homepages, portals, etc.
+        </p>
+      </div>
+    </div>
+  )
 }
 
 export default App;

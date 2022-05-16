@@ -8,7 +8,7 @@ class Edit extends Component {
     super(props);
     this.state = {
       owner: "",
-      isPublic: false,
+      isPublic: "",
       name: "",
       notes: "",
       rating: "",

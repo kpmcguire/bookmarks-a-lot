@@ -1,126 +1,149 @@
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import firebase from "../Firebase";
-import { navigate } from "@reach/router"
-import { FaSpinner } from 'react-icons/fa'
+import {navigate} from "@reach/router"
+import {FaSpinner} from 'react-icons/fa'
 
-const Create = () => {
-
-    const handleChange = e => {
-      setState({
-        ...state,
-        [e.target.name]: e.target.value
-      })
-    }
-
-    useEffect(() => {
-      const handoff_url = new URL(window.location);
-
-      let incoming_name = handoff_url.searchParams.get("name");
-      let incoming_url = handoff_url.searchParams.get("url");
-
-      firebase.auth().onAuthStateChanged((FBUser) => {
-        if (FBUser) {
-          state.owner = FBUser.uid;
-        } else {
-          navigate(`/login`, {
-            state: { name: incoming_name, url: incoming_url },
-          });
-        }
-      });
-
-      if (incoming_name && incoming_name !== "") {
-        state.name = incoming_name;
-      }
-
-      if (incoming_url && incoming_url !== "") {
-        state.url = incoming_url;
-        fetchImage();
-      }
-    },[])
-
-
-    function uuidv4() {
-      return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (
-          c ^
-          (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-        ).toString(16)
-      );
-    }
-
-    function onUrlChange(e) {
-      if (e.target.checkValidity()) {
-        setState({ ...state, url: e.target.value })
-      } else {
-        return false
-      }
-    }
-
-    function onSubmit(e) {
-      e.preventDefault();
-
-      ref
-        .add(state)
-        .then(() => {
-          navigate("/");
-        })
-        .catch((error) => {
-          console.error("Error adding document: ", error);
-        });
-    };
-
-    function fetchImage(e) {
-
-      if (e.target.checkValidity()) {
-        setState({ ...state, url: e.target.value })
-
-
-        if (state.thumbnail !== null && state.url !== "") {
-          setState({ ...state, isLoading: true, thumbnail: null })
-
-          fetch(
-              `${process.env.REACT_APP_THUMBNAIL_CREATOR_URL}/image?url=${state.url}`
-            )
-            .then((response) => response.json())
-            .then((thumb) => {
-              var datapng = "data:image/png;base64," + thumb.image;
-              document.getElementById("myimage").src = datapng.toString("base64");
-              let storageRef = firebase
-                .storage()
-                .ref("images")
-                .child(`${uuidv4()}.png`);
-              storageRef.putString(thumb.image, "base64").then((snapshot) => {
-                snapshot.ref.getDownloadURL().then((imageurl) => {
-                  setState({ ...state, isLoading: false, thumbnail: imageurl })
-                });
-              });
-            });
-
-        } else {
-          return false
-        }
-      }
-    };
-
-    const [state, setState] = useState({
+class Create extends Component {
+  constructor() {
+    super();
+    this.ref = firebase.firestore().collection("bookmarks");
+    this.state = {
       owner: "",
-      isPublic: "",
+      isPublic: "true",
       name: "",
       notes: "",
       rating: "",
       url: "",
       thumbnail: "",
-      isLoading: "",
-      isValidUrl: "",
-    })
-  
-  const ref = firebase.firestore().collection("bookmarks");
- 
+      isLoading: false,
+      isValidUrl: false
+    };
+  }
+
+  uuidv4() {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+      (
+        c ^
+        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
+    );
+  }
+
+  componentDidMount() {
+    const handoff_url = new URL(window.location);
+
+    let incoming_name = handoff_url.searchParams.get("name");
+    let incoming_url = handoff_url.searchParams.get("url");
+
+    firebase.auth().onAuthStateChanged((FBUser) => {
+      if (FBUser) {
+        this.setState({
+          owner: FBUser.uid,
+        });
+      } else {
+        navigate(`/login`, {
+          state: { name: incoming_name, url: incoming_url },
+        });
+      }
+    });
+
+    if (incoming_name && incoming_name !== "") {
+      this.setState({
+        name: incoming_name,
+      });
+    }
+
+    if (incoming_url && incoming_url !== "") {
+      this.setState({
+        url: incoming_url
+      }, ()=> {
+        this.fetchImage()
+      });
+    }
+  }
+
+  onChange = (e) => {
+    const state = this.state;
+    state[e.target.name] = e.target.value;
+    this.setState(state);
+  };
+
+  onUrlChange = (e) => {
+    if (e.target.checkValidity() === true && e.target.value !== '' ) {
+      const state = this.state;
+      console.log(e.target.value)
+      state[e.target.name] = e.target.value;
+      this.setState(state);
+      this.fetchImage()
+    } else {
+      return false
+    }
+
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    const { owner, isPublic, name, notes, rating, url, thumbnail } = this.state;
+
+    this.ref
+      .add({
+        owner,
+        isPublic,
+        name,
+        notes,
+        rating,
+        url,
+        thumbnail,
+      })
+      .then((docRef) => {
+        this.setState({
+          owner: "",
+          isPublic: "",
+          name: "",
+          notes: "",
+          rating: "",
+          url: "",
+          thumbnail: "",
+        });
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
+  };
+
+  fetchImage = () => {
+
+    this.setState({ isLoading: true, thumbnail: null });
+
+    fetch(
+      `${process.env.REACT_APP_THUMBNAIL_CREATOR_URL}/image?url=${this.state.url}`
+    )
+      .then((response) => response.json())
+      .then((thumb) => {
+        var datapng = "data:image/png;base64," + thumb.image;
+        document.getElementById("myimage").src = datapng.toString("base64");
+        let storageRef = firebase
+          .storage()
+          .ref("images")
+          .child(`${this.uuidv4()}.png`);
+        storageRef.putString(thumb.image, "base64").then((snapshot) => {
+          snapshot.ref.getDownloadURL().then((imageurl) => {
+            this.setState({ isLoading: false });
+            this.setState({ thumbnail: imageurl });
+          });
+        });
+      });
+  };
+
+  render() {
+    const { owner, isPublic, name, notes, rating, url, thumbnail } = this.state;
     return (
       <div>
         <h1 className="text-xl font-bold">Create Bookmark</h1>
 
-        <form onSubmit={e => onSubmit(e)}>
+        <form onSubmit={this.onSubmit}>
           <div className="form-group">
             <label
               htmlFor="name"
@@ -133,13 +156,13 @@ const Create = () => {
               className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-3"
               name="name"
               id="name"
-              value={state.name}
-              onChange={handleChange}
+              value={name}
+              onChange={this.onChange}
             />
           </div>
           <div className="form-group">
             <div className="grid grid-cols-10">
-              <div className="col-span-9">
+              <div className="col-span-10 sm:col-span-9">
                 <label
                   htmlFor="url"
                   className="block text-gray-700 text-sm font-bold mb-2"
@@ -151,27 +174,26 @@ const Create = () => {
                   className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-3"
                   name="url"
                   id="url"
-                  value={state.url}
-                  onChange={handleChange}
-                  onBlur={fetchImage}
+                  defaultValue={this.state.url}
+                  onBlur={this.onUrlChange}
                 />
               </div>
-              <div className="col-span-1 ml-4">
+                <div className="col-span-4 sm:col-span-1 ml-0 mb-2 sm:ml-4 sm:mb-0 sm:mt-6">
                 <img
-                  alt="" className={state.thumbnail ? "" : "hidden"}
+                  alt="" className={this.state.thumbnail ? "" : "hidden"}
                   id="myimage"
                 />
 
-                {state.thumbnail ? (
+                {this.state.thumbnail ? (
                   ""
                 ) : (
                   <div
                     className={
                       "thumbnail-placeholder bg-gray-200 " +
-                      (state.isLoading ? "loading" : "")
+                      (this.state.isLoading ? "loading" : "")
                     }
                   >
-                    {state.isLoading === true && !state.thumbnail ? (
+                    {this.state.isLoading === true && !this.state.thumbnail ? (
                       <FaSpinner className="loading-spinner" />
                     ) : (
                       ""
@@ -192,8 +214,8 @@ const Create = () => {
               className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-3"
               name="notes"
               id="notes"
-              value={state.notes}
-              onChange={handleChange}
+              onChange={this.onChange}
+              value={notes}
             ></textarea>
           </div>
           <div className="form-group">
@@ -208,8 +230,8 @@ const Create = () => {
               className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-3"
               name="rating"
               id="rating"
-              value={state.rating}
-              onChange={handleChange}
+              value={rating}
+              onChange={this.onChange}
             />
           </div>
 
@@ -219,9 +241,9 @@ const Create = () => {
               type="radio"
               name="isPublic"
               value="true"
-              onChange={handleChange}
+              onChange={this.onChange}
               className="ml-2"
-              checked={state.isPublic === "true"}
+              checked={this.state.isPublic === "true"}
             />
           </label>
 
@@ -231,9 +253,9 @@ const Create = () => {
               type="radio"
               name="isPublic"
               value="false"
-              onChange={handleChange}
+              onChange={this.onChange}
               className="ml-2"
-              checked={state.isPublic === "false"}
+              checked={this.state.isPublic === "false"}
             />
           </label>
 
@@ -248,5 +270,7 @@ const Create = () => {
         </form>
       </div>
     );
+  }
 }
+
 export default Create;

@@ -5,7 +5,7 @@ import {FaExternalLinkAlt} from 'react-icons/fa'
 class BookmarksList extends Component {
   render() {
     return (
-      <div className="">
+      <div>
         <h1 className="text-xl font-bold"> {this.props.displayName}'s Bookmarks</h1>
         <Link
           to="/create"
@@ -33,7 +33,7 @@ class BookmarksList extends Component {
                     )}
                   </Link>
                   
-                  <span class="inline-block py-1.5 px-2.5 ml-2 text-xs leading-none text-center whitespace-nowrap align-baseline font-bold bg-slate-600 text-white rounded">{bookmark.isPublic ? 'Public' : 'Private'}</span>
+                  <span className="inline-block py-1.5 px-2.5 ml-2 text-xs leading-none text-center whitespace-nowrap align-baseline font-bold bg-slate-600 text-white rounded">{bookmark.isPublic ? 'Public' : 'Private'}</span>
 
                   
                 </li>
@@ -50,6 +50,14 @@ class BookmarksList extends Component {
             </li>
           ))}
         </ul>
+        
+          {this.props.numBookmarksShown < this.props.totalNumBookmarks &&          
+            <button type="button" onClick={this.props.onNextPage} className={
+            "bg-green-700 hover:bg-green-900 active:bg-green-500 text-white font-bold py-2 px-4 rounded my-2"}>
+              Load more
+            </button>
+          }
+        
       </div>
     );
   }

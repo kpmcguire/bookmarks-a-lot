@@ -4,14 +4,11 @@ import {navigate} from "@reach/router"
 
 
 const Bookmarklet = () => {
-  
-  const [owner] = useState('');
-  
+    
   useEffect(()=>{
       firebase.auth().onAuthStateChanged(FBUser => {
-      if (FBUser) {
-        owner = FBUser.uid
-      } else {
+      
+      if (!FBUser) {
         navigate(`/login`)
       }
     })    
